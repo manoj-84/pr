@@ -48,6 +48,7 @@ export function AlertsPanel() {
             </div>
           </div>
         ))}
+        </div>
       </CardContent>
     </Card>
   );
