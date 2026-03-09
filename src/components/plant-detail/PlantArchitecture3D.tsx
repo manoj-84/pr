@@ -79,10 +79,10 @@ const GRID_LABEL: Record<GridConnection, { text: string; color: string }> = {
   hybrid: { text: "HYBRID", color: "hsl(270, 60%, 55%)" },
 };
 
-// ─── Node dimensions ────────────────────────────────────────────────────────
+// ─── Layout Configuration ───────────────────────────────────────────────────
 
-const NODE_W = 100;
-const NODE_H = 56;
+const COLUMN_SPACING = 180;
+const ROW_SPACING = 120;
 
 // ─── SVG Icon renderers (tiny inline icons per type) ─────────────────────────
 
