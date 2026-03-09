@@ -1,317 +1,322 @@
-import { Plant, inverters, alerts } from "@/data/mock-data";
+import { Plant } from "@/data/mock-data";
 import { Card } from "@/components/ui/card";
 import { useMemo } from "react";
+import {
+  plantTopologies,
+  computeLayout,
+  LayoutNode,
+  LayoutEdge,
+  EquipmentType,
+  GridConnection,
+} from "@/data/topology";
 
 interface PlantArchitectureProps {
   plant: Plant;
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  online: "#10b981",
-  warning: "#f59e0b",
-  offline: "#ef4444",
+// ─── Color mapping ───────────────────────────────────────────────────────────
+
+const STATUS_COLORS: Record<string, string> = {
+  online: "hsl(142, 50%, 45%)",   // --success
+  warning: "hsl(38, 92%, 50%)",   // --warning
+  offline: "hsl(0, 62%, 50%)",    // --destructive
 };
 
+const TYPE_COLORS: Record<EquipmentType, string> = {
+  "solar-array": "hsl(210, 100%, 56%)",  // --primary
+  combiner: "hsl(210, 100%, 56%)",
+  inverter: "hsl(210, 100%, 56%)",
+  junction: "hsl(210, 100%, 56%)",
+  battery: "hsl(38, 92%, 50%)",
+  transformer: "hsl(270, 60%, 55%)",
+  grid: "hsl(270, 60%, 55%)",
+  load: "hsl(142, 50%, 45%)",
+};
+
+const GRID_LABEL: Record<GridConnection, { text: string; color: string }> = {
+  "on-grid": { text: "ON-GRID", color: "hsl(142, 50%, 45%)" },
+  "off-grid": { text: "OFF-GRID", color: "hsl(38, 92%, 50%)" },
+  hybrid: { text: "HYBRID", color: "hsl(270, 60%, 55%)" },
+};
+
+// ─── Node dimensions ────────────────────────────────────────────────────────
+
+const NODE_W = 100;
+const NODE_H = 56;
+
+// ─── SVG Icon renderers (tiny inline icons per type) ─────────────────────────
+
+function renderNodeIcon(type: EquipmentType, cx: number, cy: number, color: string) {
+  switch (type) {
+    case "solar-array":
+      return (
+        <g>
+          <rect x={cx - 10} y={cy - 6} width={20} height={12} rx="1" fill="none" stroke={color} strokeWidth="1.2" />
+          <line x1={cx - 3} y1={cy - 6} x2={cx - 3} y2={cy + 6} stroke={color} strokeWidth="0.6" opacity="0.6" />
+          <line x1={cx + 3} y1={cy - 6} x2={cx + 3} y2={cy + 6} stroke={color} strokeWidth="0.6" opacity="0.6" />
+          <line x1={cx - 10} y1={cy} x2={cx + 10} y2={cy} stroke={color} strokeWidth="0.6" opacity="0.6" />
+        </g>
+      );
+    case "combiner":
+      return <rect x={cx - 6} y={cy - 6} width={12} height={12} rx="2" fill="none" stroke={color} strokeWidth="1.2" />;
+    case "inverter":
+      return (
+        <g>
+          <rect x={cx - 8} y={cy - 7} width={16} height={14} rx="2" fill="none" stroke={color} strokeWidth="1.2" />
+          <text x={cx} y={cy + 3} textAnchor="middle" fill={color} fontSize="7" fontWeight="bold">~</text>
+        </g>
+      );
+    case "junction":
+      return <circle cx={cx} cy={cy} r="6" fill="none" stroke={color} strokeWidth="1.5" />;
+    case "battery":
+      return (
+        <g>
+          <rect x={cx - 8} y={cy - 5} width={16} height={10} rx="2" fill="none" stroke={color} strokeWidth="1.2" />
+          <rect x={cx + 8} y={cy - 2} width={3} height={4} rx="1" fill={color} opacity="0.6" />
+          <line x1={cx - 4} y1={cy} x2={cx + 4} y2={cy} stroke={color} strokeWidth="1" />
+        </g>
+      );
+    case "transformer":
+      return (
+        <g>
+          <circle cx={cx - 4} cy={cy} r="5" fill="none" stroke={color} strokeWidth="1" />
+          <circle cx={cx + 4} cy={cy} r="5" fill="none" stroke={color} strokeWidth="1" />
+        </g>
+      );
+    case "grid":
+      return (
+        <g>
+          <line x1={cx} y1={cy - 8} x2={cx} y2={cy + 8} stroke={color} strokeWidth="1.5" />
+          <line x1={cx - 8} y1={cy - 3} x2={cx + 8} y2={cy - 3} stroke={color} strokeWidth="1.2" />
+          <line x1={cx - 6} y1={cy + 3} x2={cx + 6} y2={cy + 3} stroke={color} strokeWidth="1.2" />
+        </g>
+      );
+    case "load":
+      return (
+        <g>
+          <rect x={cx - 8} y={cy - 6} width={16} height={12} rx="2" fill="none" stroke={color} strokeWidth="1.2" />
+          <line x1={cx - 8} y1={cy - 1} x2={cx + 8} y2={cy - 1} stroke={color} strokeWidth="0.6" />
+          <line x1={cx - 8} y1={cy + 3} x2={cx + 8} y2={cy + 3} stroke={color} strokeWidth="0.6" />
+        </g>
+      );
+  }
+}
+
+// ─── Edge renderer ───────────────────────────────────────────────────────────
+
+function EdgeLine({ edge, idx }: { edge: LayoutEdge; idx: number }) {
+  const fromX = edge.from.x + NODE_W / 2;
+  const fromY = edge.from.y + NODE_H / 2;
+  const toX = edge.to.x + NODE_W / 2;
+  const toY = edge.to.y + NODE_H / 2;
+
+  // Clip to node edges
+  const dx = toX - fromX;
+  const dy = toY - fromY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist === 0) return null;
+
+  const ux = dx / dist;
+  const uy = dy / dist;
+  const sx = fromX + ux * (NODE_W / 2 + 4);
+  const sy = fromY + uy * (NODE_H / 2 + 4);
+  const ex = toX - ux * (NODE_W / 2 + 4);
+  const ey = toY - uy * (NODE_H / 2 + 4);
+
+  const isActive = edge.from.status !== "offline" && edge.to.status !== "offline" && (edge.powerKW ?? 0) > 0;
+  const color = isActive ? TYPE_COLORS[edge.to.type] : "hsl(220, 15%, 25%)";
+
+  const midX = (sx + ex) / 2;
+  const midY = (sy + ey) / 2;
+
+  const markerId = `arrow-${idx}`;
+
+  return (
+    <g>
+      <defs>
+        <marker id={markerId} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L6,3 z" fill={color} />
+        </marker>
+      </defs>
+      <line
+        x1={sx} y1={sy} x2={ex} y2={ey}
+        stroke={color} strokeWidth="1.5" strokeDasharray="6,4"
+        opacity={isActive ? 0.8 : 0.3}
+        markerEnd={`url(#${markerId})`}
+      >
+        {isActive && (
+          <animate attributeName="stroke-dashoffset" values="0;-20" dur="1.2s" repeatCount="indefinite" />
+        )}
+      </line>
+      {edge.bidirectional && (
+        <line
+          x1={ex} y1={ey} x2={sx} y2={sy}
+          stroke={color} strokeWidth="1" strokeDasharray="4,6"
+          opacity={0.3}
+        />
+      )}
+      {edge.powerKW !== undefined && edge.powerKW > 0 && (
+        <g>
+          <rect x={midX - 22} y={midY - 8} width={44} height={14} rx="3"
+            fill="hsl(220, 25%, 10%)" fillOpacity="0.9" stroke={color} strokeWidth="0.5" />
+          <text x={midX} y={midY + 2} textAnchor="middle" fill={color} fontSize="8" fontWeight="600">
+            {edge.powerKW} kW
+          </text>
+        </g>
+      )}
+      {edge.label && (
+        <text x={midX} y={midY + 16} textAnchor="middle" fill="hsl(215, 15%, 55%)" fontSize="7">
+          {edge.label}
+        </text>
+      )}
+    </g>
+  );
+}
+
+// ─── Node renderer ───────────────────────────────────────────────────────────
+
+function NodeBox({ node }: { node: LayoutNode }) {
+  const statusColor = STATUS_COLORS[node.status];
+  const typeColor = TYPE_COLORS[node.type];
+  const isFault = node.status === "offline";
+
+  return (
+    <g>
+      {/* Card background */}
+      <rect
+        x={node.x} y={node.y} width={NODE_W} height={NODE_H} rx="6"
+        fill="hsl(220, 25%, 10%)" stroke={statusColor} strokeWidth={isFault ? 2 : 1.2}
+      />
+      {/* Status bar */}
+      <rect
+        x={node.x} y={node.y} width={NODE_W} height={14} rx="3"
+        fill={statusColor} fillOpacity="0.2"
+      />
+      {/* Label */}
+      <text x={node.x + NODE_W / 2} y={node.y + 10} textAnchor="middle" fill={statusColor} fontSize="8" fontWeight="600">
+        {node.label}
+      </text>
+      {/* Icon */}
+      {renderNodeIcon(node.type, node.x + 20, node.y + 34, typeColor)}
+      {/* Output value */}
+      {node.output !== undefined && (
+        <text x={node.x + 58} y={node.y + 32} textAnchor="middle" fill="hsl(210, 40%, 93%)" fontSize="9" fontWeight="bold">
+          {node.output === 0 ? "OFF" : `${Math.abs(node.output)} kW`}
+        </text>
+      )}
+      {/* Detail */}
+      {node.detail && (
+        <text x={node.x + NODE_W / 2} y={node.y + 48} textAnchor="middle" fill="hsl(215, 15%, 55%)" fontSize="7">
+          {node.detail}
+        </text>
+      )}
+      {/* Fault indicator */}
+      {isFault && (
+        <circle cx={node.x + NODE_W - 8} cy={node.y + 8} r="4" fill="hsl(0, 62%, 50%)">
+          <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
+        </circle>
+      )}
+    </g>
+  );
+}
+
+// ─── Main component ──────────────────────────────────────────────────────────
+
 export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
-  const faultIds = useMemo(() => new Set(alerts.map(a => {
-    const match = a.message.match(/INV-\d+/);
-    return match ? match[0] : null;
-  }).filter(Boolean)), []);
+  const topology = plantTopologies[plant.id];
 
-  const panelRows = 3;
-  const panelsPerRow = 4;
-  const panelW = 48;
-  const panelH = 30;
-  const panelGapX = 12;
-  const panelGapY = 14;
-  const panelStartX = 30;
-  const panelStartY = 50;
+  const layout = useMemo(() => {
+    if (!topology) return null;
+    return computeLayout(topology);
+  }, [topology]);
 
-  const combinerX = 280;
-  const combinerYs = [90, 180, 270];
+  if (!topology || !layout) {
+    return (
+      <Card className="w-full bg-card border-border p-8 text-center">
+        <p className="text-muted-foreground">No topology data available for this plant.</p>
+      </Card>
+    );
+  }
 
-  const invStartX = 420;
-  const invYs = inverters.slice(0, 4).map((_, i) => 70 + i * 72);
+  const gridInfo = GRID_LABEL[topology.gridConnection];
 
-  // Power distribution - spread out horizontally
-  const junctionX = 560;
-  const junctionY = 180;
-  
-  const loadX = 660;
-  const loadY = 60;
-  
-  const gridX = 660;
-  const gridY = 280;
+  // Compute viewBox from layout
+  const maxX = Math.max(...layout.nodes.map(n => n.x)) + NODE_W + 40;
+  const maxY = Math.max(...layout.nodes.map(n => n.y)) + NODE_H + 60;
+  const viewW = Math.max(780, maxX);
+  const viewH = Math.max(360, maxY);
 
-  // Calculate power distribution
-  const totalGeneration = inverters.slice(0, 4).reduce((sum, inv) => sum + inv.output, 0);
-  const loadConsumption = 680; // kW consumed by facility
-  const gridExport = Math.max(0, totalGeneration - loadConsumption);
+  // Summary stats
+  const totalGen = layout.nodes
+    .filter(n => n.type === "inverter" && n.status !== "offline")
+    .reduce((s, n) => s + (n.output ?? 0), 0);
+  const totalLoad = layout.nodes
+    .filter(n => n.type === "load")
+    .reduce((s, n) => s + (n.output ?? 0), 0);
+  const batteryNode = layout.nodes.find(n => n.type === "battery");
 
   return (
     <Card className="w-full bg-card border-border overflow-hidden">
+      {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Plant Architecture — Live View</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Electricity flow • Faults highlighted in red
+            {plant.name} • {plant.capacity.toLocaleString()} kWp • Electricity flow schematic
           </p>
         </div>
-        <div className="flex gap-4 text-xs">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full inline-block" style={{background:"#10b981"}}></span> Online</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full inline-block" style={{background:"#f59e0b"}}></span> Warning</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full inline-block" style={{background:"#ef4444"}}></span> Offline/Fault</span>
+        <div className="flex items-center gap-4">
+          <span
+            className="text-xs font-bold px-2 py-1 rounded"
+            style={{ color: gridInfo.color, background: `${gridInfo.color}20`, border: `1px solid ${gridInfo.color}40` }}
+          >
+            {gridInfo.text}
+          </span>
+          <div className="flex gap-3 text-xs">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: STATUS_COLORS.online }} /> Online</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: STATUS_COLORS.warning }} /> Warning</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: STATUS_COLORS.offline }} /> Offline</span>
+          </div>
         </div>
       </div>
 
+      {/* Schematic SVG */}
       <div className="overflow-x-auto">
         <svg
-          viewBox="0 0 850 440"
+          viewBox={`0 0 ${viewW} ${viewH}`}
           className="w-full"
-          style={{ minWidth: 700, maxHeight: 500, background: "transparent" }}
+          style={{ minWidth: 600, maxHeight: 500 }}
         >
-          <defs>
-            {/* Animated electricity flow */}
-            <marker id="arrowBlue" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L6,3 z" fill="#00D4FF" />
-            </marker>
-            <marker id="arrowGray" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L6,3 z" fill="#374151" />
-            </marker>
-            <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L6,3 z" fill="#10b981" />
-            </marker>
-            <marker id="arrowPurple" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L6,3 z" fill="#9333ea" />
-            </marker>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-              <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-          </defs>
-
-          {/* ── SECTION LABELS ── */}
-          {[
-            { x: panelStartX + (panelsPerRow * (panelW + panelGapX)) / 2 - 20, y: 28, label: "SOLAR PANELS" },
-            { x: combinerX + 22, y: 28, label: "COMBINER" },
-            { x: invStartX + 30, y: 28, label: "INVERTERS" },
-            { x: loadX + 44, y: 48, label: "FACILITY LOAD" },
-            { x: gridX + 44, y: 270, label: "UTILITY GRID" },
-          ].map(({ x, y, label }) => (
-            <text key={label} x={x} y={y} textAnchor="middle" fill="#6b7280" fontSize="9" fontWeight="600" letterSpacing="1">
-              {label}
-            </text>
+          {/* Edges first (behind nodes) */}
+          {layout.edges.map((edge, i) => (
+            <EdgeLine key={`edge-${i}`} edge={edge} idx={i} />
           ))}
-
-          {/* ── SOLAR PANEL GRID ── */}
-          {Array.from({ length: panelRows }).map((_, row) =>
-            Array.from({ length: panelsPerRow }).map((_, col) => {
-              const x = panelStartX + col * (panelW + panelGapX);
-              const y = panelStartY + row * (panelH + panelGapY);
-              const fault = row === 1 && col === 1; // simulate one fault panel
-              const color = fault ? "#ef4444" : "#3b82f6";
-              return (
-                <g key={`panel-${row}-${col}`}>
-                  <rect x={x} y={y} width={panelW} height={panelH} rx="3"
-                    fill={color} fillOpacity="0.25" stroke={color} strokeWidth="1.5" />
-                  {/* Panel cell lines */}
-                  <line x1={x + panelW / 3} y1={y} x2={x + panelW / 3} y2={y + panelH} stroke={color} strokeWidth="0.5" opacity="0.5" />
-                  <line x1={x + (2 * panelW) / 3} y1={y} x2={x + (2 * panelW) / 3} y2={y + panelH} stroke={color} strokeWidth="0.5" opacity="0.5" />
-                  <line x1={x} y1={y + panelH / 2} x2={x + panelW} y2={y + panelH / 2} stroke={color} strokeWidth="0.5" opacity="0.5" />
-                  {fault && (
-                    <text x={x + panelW / 2} y={y + panelH / 2 + 4} textAnchor="middle" fill="#ef4444" fontSize="10" fontWeight="bold">!</text>
-                  )}
-                </g>
-              );
-            })
-          )}
-
-          {/* Wires from panel rows to combiners */}
-          {combinerYs.map((cy, i) => {
-            const rowY = panelStartY + i * (panelH + panelGapY) + panelH / 2;
-            const wireX = panelStartX + panelsPerRow * (panelW + panelGapX) - panelGapX;
-            return (
-              <g key={`wire-panel-comb-${i}`}>
-                <line x1={wireX} y1={rowY} x2={combinerX - 5} y2={cy + 18}
-                  stroke="#00D4FF" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.7">
-                  <animate attributeName="stroke-dashoffset" values="0;-20" dur="1.5s" repeatCount="indefinite" />
-                </line>
-              </g>
-            );
-          })}
-
-          {/* ── COMBINER BOXES ── */}
-          {combinerYs.map((cy, i) => (
-            <g key={`combiner-${i}`}>
-              <rect x={combinerX} y={cy} width={44} height={36} rx="5"
-                fill="#1d2535" stroke="#00D4FF" strokeWidth="1.5" />
-              <text x={combinerX + 22} y={cy + 14} textAnchor="middle" fill="#00D4FF" fontSize="7" fontWeight="bold">CB</text>
-              <text x={combinerX + 22} y={cy + 26} textAnchor="middle" fill="#9ca3af" fontSize="7">{`S${(i * 2) + 1}-${(i * 2) + 2}`}</text>
-            </g>
+          {/* Nodes */}
+          {layout.nodes.map(node => (
+            <NodeBox key={node.id} node={node} />
           ))}
-
-          {/* Wires from combiners to inverters */}
-          {combinerYs.map((cy, ci) => {
-            const invPairs = [[0, 1], [2, 3], [3]];
-            return (invPairs[ci] || []).map((ii) => {
-              const iy = invYs[ii];
-              if (iy === undefined) return null;
-              return (
-                <line key={`wire-comb-inv-${ci}-${ii}`}
-                  x1={combinerX + 44} y1={cy + 18} x2={invStartX - 5} y2={iy + 26}
-                  stroke="#00D4FF" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.7"
-                  markerEnd="url(#arrowBlue)">
-                  <animate attributeName="stroke-dashoffset" values="0;-20" dur="1.2s" repeatCount="indefinite" />
-                </line>
-              );
-            });
-          })}
-
-          {/* ── INVERTERS ── */}
-          {inverters.slice(0, 4).map((inv, i) => {
-            const iy = invYs[i];
-            const color = STATUS_COLOR[inv.status];
-            const hasFault = faultIds.has(inv.name);
-            return (
-              <g key={inv.id}>
-                <rect x={invStartX} y={iy} width={80} height={52} rx="6"
-                  fill="#1d2535" stroke={color} strokeWidth={hasFault ? 2.5 : 1.5}
-                  filter={hasFault ? "url(#glow)" : undefined} />
-                <rect x={invStartX} y={iy} width={80} height={12} rx="3"
-                  fill={color} fillOpacity="0.3" />
-                <text x={invStartX + 40} y={iy + 9} textAnchor="middle" fill={color} fontSize="8" fontWeight="bold">
-                  {inv.name}
-                </text>
-                <text x={invStartX + 40} y={iy + 25} textAnchor="middle" fill="white" fontSize="10" fontWeight="semibold">
-                  {inv.output > 0 ? `${inv.output} kW` : "OFFLINE"}
-                </text>
-                <text x={invStartX + 40} y={iy + 38} textAnchor="middle" fill="#9ca3af" fontSize="8">
-                  {inv.temperature}°C
-                </text>
-                {inv.statusDetail && (
-                  <text x={invStartX + 40} y={iy + 48} textAnchor="middle" fill={color} fontSize="7">
-                    {inv.statusDetail}
-                  </text>
-                )}
-                {hasFault && (
-                  <circle cx={invStartX + 70} cy={iy + 8} r="5" fill="#ef4444">
-                    <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
-                  </circle>
-                )}
-              </g>
-            );
-          })}
-
-          {/* Wires from inverters to junction */}
-          {invYs.map((iy, i) => {
-            const inv = inverters[i];
-            const color = inv?.status === "online" ? "#00D4FF" : "#374151";
-            const active = inv?.status === "online";
-            return (
-              <line key={`wire-inv-junction-${i}`}
-                x1={invStartX + 80} y1={iy + 26} x2={junctionX - 8} y2={junctionY}
-                stroke={color} strokeWidth="1.5" strokeDasharray="6,4" opacity="0.7"
-                markerEnd={active ? "url(#arrowBlue)" : "url(#arrowGray)"}>
-                {active && (
-                  <animate attributeName="stroke-dashoffset" values="0;-20" dur="1s" repeatCount="indefinite" />
-                )}
-              </line>
-            );
-          })}
-
-          {/* ── POWER JUNCTION ── */}
-          <g>
-            <circle cx={junctionX} cy={junctionY} r="8" fill="#1d2535" stroke="#00D4FF" strokeWidth="2" filter="url(#glow)" />
-            <text x={junctionX} y={junctionY - 18} textAnchor="middle" fill="#00D4FF" fontSize="9" fontWeight="bold">
-              {totalGeneration} kW
-            </text>
-            <text x={junctionX} y={junctionY - 28} textAnchor="middle" fill="#9ca3af" fontSize="7">
-              TOTAL GEN
-            </text>
-          </g>
-
-          {/* Wire from junction to facility load */}
-          <line 
-            x1={junctionX} y1={junctionY} x2={loadX + 44} y2={loadY + 70}
-            stroke="#10b981" strokeWidth="2" strokeDasharray="6,4" opacity="0.8"
-            markerEnd="url(#arrowGreen)">
-            <animate attributeName="stroke-dashoffset" values="0;-20" dur="1s" repeatCount="indefinite" />
-          </line>
-          {/* Load power label */}
-          <rect x={junctionX + 30} y={junctionY - 60} width={70} height={18} rx="4" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1" />
-          <text x={junctionX + 65} y={junctionY - 47} textAnchor="middle" fill="#10b981" fontSize="9" fontWeight="bold">
-            {loadConsumption} kW
-          </text>
-
-          {/* Wire from junction to grid */}
-          <line 
-            x1={junctionX} y1={junctionY} x2={gridX + 44} y2={gridY + 30}
-            stroke="#9333ea" strokeWidth="2" strokeDasharray="6,4" opacity="0.8"
-            markerEnd="url(#arrowPurple)">
-            <animate attributeName="stroke-dashoffset" values="0;-20" dur="1.2s" repeatCount="indefinite" />
-          </line>
-          {/* Grid export label */}
-          <rect x={junctionX + 30} y={junctionY + 40} width={70} height={18} rx="4" fill="#9333ea" fillOpacity="0.2" stroke="#9333ea" strokeWidth="1" />
-          <text x={junctionX + 65} y={junctionY + 53} textAnchor="middle" fill="#a855f7" fontSize="9" fontWeight="bold">
-            {gridExport} kW
-          </text>
-
-          {/* ── FACILITY LOAD ── */}
-          <g>
-            <rect x={loadX} y={loadY} width={88} height={70} rx="8"
-              fill="#1d2535" stroke="#10b981" strokeWidth="2" filter="url(#glow)" />
-            {/* Building icon */}
-            <rect x={loadX + 20} y={loadY + 15} width={48} height={40} rx="3" fill="none" stroke="#10b981" strokeWidth="1.5" />
-            <line x1={loadX + 20} y1={loadY + 30} x2={loadX + 68} y2={loadY + 30} stroke="#10b981" strokeWidth="1" />
-            <line x1={loadX + 20} y1={loadY + 42} x2={loadX + 68} y2={loadY + 42} stroke="#10b981" strokeWidth="1" />
-            <line x1={loadX + 35} y1={loadY + 15} x2={loadX + 35} y2={loadY + 55} stroke="#10b981" strokeWidth="1" />
-            <line x1={loadX + 53} y1={loadY + 15} x2={loadX + 53} y2={loadY + 55} stroke="#10b981" strokeWidth="1" />
-            <text x={loadX + 44} y={loadY + 84} textAnchor="middle" fill="#10b981" fontSize="10" fontWeight="bold">
-              FACILITY
-            </text>
-            <text x={loadX + 44} y={loadY + 96} textAnchor="middle" fill="#9ca3af" fontSize="9">
-              {loadConsumption} kW Load
-            </text>
-          </g>
-
-          {/* ── UTILITY GRID ── */}
-          <g>
-            <rect x={gridX} y={gridY} width={88} height={60} rx="8"
-              fill="#1d2535" stroke="#9333ea" strokeWidth="2" filter="url(#glow)" />
-            {/* Power tower icon */}
-            <line x1={gridX + 44} y1={gridY + 8} x2={gridX + 44} y2={gridY + 52} stroke="#9333ea" strokeWidth="2" />
-            <line x1={gridX + 20} y1={gridY + 22} x2={gridX + 68} y2={gridY + 22} stroke="#9333ea" strokeWidth="2" />
-            <line x1={gridX + 26} y1={gridY + 36} x2={gridX + 62} y2={gridY + 36} stroke="#9333ea" strokeWidth="2" />
-            <line x1={gridX + 20} y1={gridY + 22} x2={gridX + 26} y2={gridY + 52} stroke="#9333ea" strokeWidth="1.5" />
-            <line x1={gridX + 68} y1={gridY + 22} x2={gridX + 62} y2={gridY + 52} stroke="#9333ea" strokeWidth="1.5" />
-            <text x={gridX + 44} y={gridY + 74} textAnchor="middle" fill="#a855f7" fontSize="10" fontWeight="bold">
-              UTILITY GRID
-            </text>
-            <text x={gridX + 44} y={gridY + 86} textAnchor="middle" fill="#9ca3af" fontSize="9">
-              {gridExport} kW Export
-            </text>
-          </g>
-
-          {/* ── POWER DISTRIBUTION SUMMARY ── */}
-          <g>
-            <rect x={30} y={380} width={790} height={38} rx="6" fill="#1d2535" fillOpacity="0.5" stroke="#374151" strokeWidth="1" />
-            <text x={50} y={398} fill="#9ca3af" fontSize="10" fontWeight="600">
-              POWER DISTRIBUTION:
-            </text>
-            <text x={200} y={398} fill="#00D4FF" fontSize="10" fontWeight="bold">
-              Total Gen: {totalGeneration} kW
-            </text>
-            <text x={380} y={398} fill="#10b981" fontSize="10" fontWeight="bold">
-              To Load: {loadConsumption} kW ({((loadConsumption/totalGeneration)*100).toFixed(0)}%)
-            </text>
-            <text x={580} y={398} fill="#a855f7" fontSize="10" fontWeight="bold">
-              To Grid: {gridExport} kW ({((gridExport/totalGeneration)*100).toFixed(0)}%)
-            </text>
-            <text x={50} y={410} fill="#6b7280" fontSize="8">
-              Green = Facility consumption • Purple = Grid export
-            </text>
-          </g>
         </svg>
+      </div>
+
+      {/* Summary bar */}
+      <div className="p-3 border-t border-border flex flex-wrap gap-4 text-xs">
+        <span className="text-muted-foreground font-semibold">POWER SUMMARY:</span>
+        <span style={{ color: "hsl(210, 100%, 56%)" }} className="font-bold">Generation: {totalGen} kW</span>
+        {totalLoad > 0 && (
+          <span style={{ color: "hsl(142, 50%, 45%)" }} className="font-bold">
+            Load: {totalLoad} kW ({totalGen > 0 ? ((totalLoad / totalGen) * 100).toFixed(0) : 0}%)
+          </span>
+        )}
+        {topology.gridConnection !== "off-grid" && totalGen - totalLoad > 0 && (
+          <span style={{ color: "hsl(270, 60%, 55%)" }} className="font-bold">
+            Grid Export: {totalGen - totalLoad} kW
+          </span>
+        )}
+        {batteryNode && (
+          <span style={{ color: "hsl(38, 92%, 50%)" }} className="font-bold">
+            Battery: {batteryNode.detail ?? `${batteryNode.output} kW`}
+          </span>
+        )}
       </div>
     </Card>
   );
