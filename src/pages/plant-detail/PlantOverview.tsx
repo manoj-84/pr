@@ -19,6 +19,8 @@ export default function PlantOverview({ plant }: PlantOverviewProps) {
         </p>
       </div>
 
+      <PlantArchitecture3D plant={plant} />
+
       <KPICards />
       <PerformanceChart />
 

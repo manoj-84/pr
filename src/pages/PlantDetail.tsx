@@ -37,6 +37,8 @@ export default function PlantDetail() {
               <Route path="panels" element={<PlantPanels plant={plant} />} />
               <Route path="strings" element={<PlantStrings plant={plant} />} />
               <Route path="inverters" element={<PlantInverters plant={plant} />} />
+              <Route path="maintenance" element={<PlantMaintenance plant={plant} />} />
+              <Route path="faults" element={<PlantFaults plant={plant} />} />
             </Routes>
           </main>
         </div>

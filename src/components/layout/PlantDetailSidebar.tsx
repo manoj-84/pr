@@ -101,6 +101,41 @@ export function PlantDetailSidebar({ plant }: PlantDetailSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <Collapsible defaultOpen className="group/collapsible">
+          <SidebarGroup>
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-sidebar-accent rounded-lg">
+                {!collapsed && <span className="text-xs font-semibold text-muted-foreground">O&M</span>}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {omNavItems.map((item) => {
+                    const fullUrl = `/plants/${plant.id}${item.url}`;
+                    const isActive = location.pathname === fullUrl;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={isActive}>
+                          <NavLink
+                            to={fullUrl}
+                            end
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-sidebar-accent"
+                            activeClassName="bg-sidebar-accent text-primary font-medium"
+                          >
+                            <item.icon className="h-4 w-4 shrink-0" />
+                            {!collapsed && <span>{item.title}</span>}
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
       </SidebarContent>
     </Sidebar>
   );
