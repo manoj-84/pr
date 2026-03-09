@@ -8,6 +8,8 @@ import PlantOverview from "./plant-detail/PlantOverview";
 import PlantPanels from "./plant-detail/PlantPanels";
 import PlantStrings from "./plant-detail/PlantStrings";
 import PlantInverters from "./plant-detail/PlantInverters";
+import PlantMaintenance from "./plant-detail/PlantMaintenance";
+import PlantFaults from "./plant-detail/PlantFaults";
 
 export default function PlantDetail() {
   const { plantId } = useParams();
@@ -35,6 +37,8 @@ export default function PlantDetail() {
               <Route path="panels" element={<PlantPanels plant={plant} />} />
               <Route path="strings" element={<PlantStrings plant={plant} />} />
               <Route path="inverters" element={<PlantInverters plant={plant} />} />
+              <Route path="maintenance" element={<PlantMaintenance plant={plant} />} />
+              <Route path="faults" element={<PlantFaults plant={plant} />} />
             </Routes>
           </main>
         </div>
