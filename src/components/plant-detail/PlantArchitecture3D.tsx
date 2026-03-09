@@ -245,14 +245,14 @@ export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
 
           {/* Wire from junction to grid */}
           <line 
-            x1={junctionX} y1={junctionY} x2={gridX} y2={gridY + 30}
+            x1={junctionX} y1={junctionY} x2={gridX + 44} y2={gridY + 30}
             stroke="#9333ea" strokeWidth="2" strokeDasharray="6,4" opacity="0.8"
             markerEnd="url(#arrowPurple)">
             <animate attributeName="stroke-dashoffset" values="0;-20" dur="1.2s" repeatCount="indefinite" />
           </line>
           {/* Grid export label */}
-          <rect x={gridX - 40} y={junctionY + 45} width={68} height={18} rx="4" fill="#9333ea" fillOpacity="0.2" stroke="#9333ea" strokeWidth="1" />
-          <text x={gridX - 6} y={junctionY + 58} textAnchor="middle" fill="#a855f7" fontSize="9" fontWeight="bold">
+          <rect x={junctionX + 30} y={junctionY + 40} width={70} height={18} rx="4" fill="#9333ea" fillOpacity="0.2" stroke="#9333ea" strokeWidth="1" />
+          <text x={junctionX + 65} y={junctionY + 53} textAnchor="middle" fill="#a855f7" fontSize="9" fontWeight="bold">
             {gridExport} kW
           </text>
 
