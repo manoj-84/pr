@@ -8,6 +8,8 @@ import PlantOverview from "./plant-detail/PlantOverview";
 import PlantPanels from "./plant-detail/PlantPanels";
 import PlantStrings from "./plant-detail/PlantStrings";
 import PlantInverters from "./plant-detail/PlantInverters";
+import PlantMaintenance from "./plant-detail/PlantMaintenance";
+import PlantFaults from "./plant-detail/PlantFaults";
 
 export default function PlantDetail() {
   const { plantId } = useParams();
