@@ -6,6 +6,12 @@ export interface Plant {
   location: string;
   capacity: number; // kWp
   healthScore: number;
+  image: string;
+  commissionedDate: string;
+  panelCount: number;
+  stringCount: number;
+  inverterCount: number;
+  area: string; // acres
 }
 
 export interface KPIData {
