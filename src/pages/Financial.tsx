@@ -79,8 +79,17 @@ export default function Financial() {
                         <Cell key={i} fill={PIE_COLORS[i]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: chartColors.bg, border: `1px solid ${chartColors.border}`, borderRadius: "8px", fontSize: "12px", color: chartColors.fg }}
-                      formatter={(value: number) => formatINR(value)} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: chartColors.bg, 
+                        border: `1px solid ${chartColors.border}`, 
+                        borderRadius: "8px", 
+                        fontSize: "12px", 
+                        color: chartColors.fg,
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)"
+                      }}
+                      formatter={(value: number) => formatINR(value)} 
+                    />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-2 pr-4">
