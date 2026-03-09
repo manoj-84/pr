@@ -33,15 +33,15 @@ export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
   const invStartX = 420;
   const invYs = inverters.slice(0, 4).map((_, i) => 70 + i * 72);
 
-  // Power distribution
-  const junctionX = 540;
+  // Power distribution - spread out horizontally
+  const junctionX = 560;
   const junctionY = 180;
   
-  const loadX = 580;
-  const loadY = 80;
+  const loadX = 660;
+  const loadY = 60;
   
-  const gridX = 640;
-  const gridY = 260;
+  const gridX = 660;
+  const gridY = 280;
 
   // Calculate power distribution
   const totalGeneration = inverters.slice(0, 4).reduce((sum, inv) => sum + inv.output, 0);
