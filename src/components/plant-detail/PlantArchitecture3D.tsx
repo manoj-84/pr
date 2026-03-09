@@ -66,9 +66,9 @@ export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
 
       <div className="overflow-x-auto">
         <svg
-          viewBox="0 0 750 370"
+          viewBox="0 0 800 420"
           className="w-full"
-          style={{ minWidth: 600, maxHeight: 420, background: "transparent" }}
+          style={{ minWidth: 600, maxHeight: 480, background: "transparent" }}
         >
           <defs>
             {/* Animated electricity flow */}
@@ -77,6 +77,12 @@ export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
             </marker>
             <marker id="arrowGray" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
               <path d="M0,0 L0,6 L6,3 z" fill="#374151" />
+            </marker>
+            <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#10b981" />
+            </marker>
+            <marker id="arrowPurple" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#9333ea" />
             </marker>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
