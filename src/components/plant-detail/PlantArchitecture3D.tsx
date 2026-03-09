@@ -33,8 +33,20 @@ export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
   const invStartX = 420;
   const invYs = inverters.slice(0, 4).map((_, i) => 70 + i * 72);
 
+  // Power distribution
+  const junctionX = 540;
+  const junctionY = 180;
+  
+  const loadX = 580;
+  const loadY = 80;
+  
   const gridX = 640;
-  const gridY = 180;
+  const gridY = 260;
+
+  // Calculate power distribution
+  const totalGeneration = inverters.slice(0, 4).reduce((sum, inv) => sum + inv.output, 0);
+  const loadConsumption = 680; // kW consumed by facility
+  const gridExport = Math.max(0, totalGeneration - loadConsumption);
 
   return (
     <Card className="w-full bg-card border-border overflow-hidden">
