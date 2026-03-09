@@ -15,6 +15,7 @@ import PlantFaults from "./plant-detail/PlantFaults";
 
 export default function PlantDetail() {
   const { plantId } = useParams();
+  const navigate = useNavigate();
   const plant = plants.find(p => p.id === plantId);
   const [selectedDateFilter, setSelectedDateFilter] = useState("Today");
 
