@@ -1,12 +1,72 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  /* ───── Light Theme (default) ───── */
   :root {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 14%;
+
+    --primary: 210 100% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 20% 25%;
+
+    --muted: 220 14% 95%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 210 100% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 50% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 45%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 220 13% 87%;
+    --input: 220 13% 87%;
+    --ring: 210 100% 45%;
+
+    --radius: 0.25rem;
+
+    --sidebar-background: 220 14% 96%;
+    --sidebar-foreground: 220 15% 35%;
+    --sidebar-primary: 210 100% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 90%;
+    --sidebar-accent-foreground: 220 20% 14%;
+    --sidebar-border: 220 13% 87%;
+    --sidebar-ring: 210 100% 45%;
+
+    --chart-1: 210 100% 45%;
+    --chart-2: 142 50% 38%;
+    --chart-3: 38 92% 45%;
+    --chart-4: 0 62% 50%;
+    --chart-5: 270 60% 50%;
+
+    /* Chart-specific semantic tokens */
+    --chart-bg: 0 0% 100%;
+    --chart-border: 220 13% 87%;
+    --chart-text: 220 10% 46%;
+    --chart-fg: 220 20% 14%;
+  }
+
+  /* ───── Dark Theme ───── */
+  .dark {
     --background: 220 20% 7%;
     --foreground: 210 40% 93%;
 
@@ -57,9 +117,11 @@
     --chart-3: 38 92% 50%;
     --chart-4: 0 62% 50%;
     --chart-5: 270 60% 55%;
-  }
-  .dark {
-    --radius: 0.25rem;
+
+    --chart-bg: 220 25% 10%;
+    --chart-border: 220 15% 18%;
+    --chart-text: 215 15% 55%;
+    --chart-fg: 210 40% 93%;
   }
 }
 
@@ -81,14 +143,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(220, 25%, 8%);
+  background: hsl(var(--background));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(220, 15%, 25%);
+  background: hsl(var(--muted-foreground) / 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(220, 15%, 35%);
+  background: hsl(var(--muted-foreground) / 0.5);
 }

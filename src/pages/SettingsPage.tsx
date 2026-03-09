@@ -9,9 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { User, Bell, Monitor, Shield, Zap, Save } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
+import { User, Bell, Monitor, Shield, Zap, Save, Sun, Moon, Laptop } from "lucide-react";
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+
   // Profile
   const [profile, setProfile] = useState({
     name: "Vikram Singh",
@@ -51,12 +54,18 @@ export default function SettingsPage() {
     toast({ title: "Settings Saved", description: `${section} settings updated successfully.` });
   };
 
+  const themeOptions = [
+    { value: "light" as const, label: "Light", icon: Sun, desc: "Clean light interface" },
+    { value: "dark" as const, label: "Dark", icon: Moon, desc: "Easy on the eyes" },
+    { value: "system" as const, label: "System", icon: Laptop, desc: "Follow OS preference" },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Settings</h1>
 
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs defaultValue="display" className="w-full">
           <TabsList className="bg-secondary/50 border border-border">
             <TabsTrigger value="profile" className="text-xs gap-1.5"><User className="h-3.5 w-3.5" /> Profile</TabsTrigger>
             <TabsTrigger value="notifications" className="text-xs gap-1.5"><Bell className="h-3.5 w-3.5" /> Notifications</TabsTrigger>
@@ -138,7 +147,33 @@ export default function SettingsPage() {
           </TabsContent>
 
           {/* Display */}
-          <TabsContent value="display" className="mt-4">
+          <TabsContent value="display" className="mt-4 space-y-4">
+            {/* Theme Selector */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground">Theme</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-3">
+                  {themeOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setTheme(opt.value)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                        theme === opt.value
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-secondary/20 hover:bg-secondary/40"
+                      }`}
+                    >
+                      <opt.icon className={`h-5 w-5 ${theme === opt.value ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className={`text-sm font-medium ${theme === opt.value ? "text-foreground" : "text-muted-foreground"}`}>{opt.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="bg-card border-border">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">Display Preferences</CardTitle>
