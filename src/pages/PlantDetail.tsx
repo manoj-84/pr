@@ -1,4 +1,4 @@
-import { useParams, Navigate, Routes, Route } from "react-router-dom";
+import { useParams, Navigate, Routes, Route, useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { PlantDetailSidebar } from "@/components/layout/PlantDetailSidebar";
 import { TopBar } from "@/components/layout/TopBar";
