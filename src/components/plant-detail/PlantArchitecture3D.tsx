@@ -66,9 +66,9 @@ export function PlantArchitecture3D({ plant }: PlantArchitectureProps) {
 
       <div className="overflow-x-auto">
         <svg
-          viewBox="0 0 800 420"
+          viewBox="0 0 850 440"
           className="w-full"
-          style={{ minWidth: 600, maxHeight: 480, background: "transparent" }}
+          style={{ minWidth: 700, maxHeight: 500, background: "transparent" }}
         >
           <defs>
             {/* Animated electricity flow */}
