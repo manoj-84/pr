@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { financialData, formatINR } from "@/data/mock-data";
 import { useChartColors, useTooltipStyle } from "@/hooks/use-chart-colors";
@@ -14,7 +13,7 @@ export default function Financial() {
   const tooltipProps = useTooltipStyle();
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Financial Overview</h1>
 
@@ -113,6 +112,6 @@ export default function Financial() {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

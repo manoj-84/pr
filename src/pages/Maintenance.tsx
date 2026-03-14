@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -22,7 +21,7 @@ const statusStyles = {
 
 export default function Maintenance() {
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">O&M / SLA Management</h1>
 
@@ -79,6 +78,6 @@ export default function Maintenance() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

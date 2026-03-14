@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { performanceMetrics, stringData, hourlyData } from "@/data/mock-data";
@@ -26,7 +25,7 @@ export default function Performance() {
   const tooltipProps = useTooltipStyle();
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Performance Analytics</h1>
 
@@ -152,6 +151,6 @@ export default function Performance() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

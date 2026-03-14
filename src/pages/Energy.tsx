@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { energyData } from "@/data/mock-data";
@@ -17,7 +16,7 @@ export default function Energy() {
   const loadSample = energyData.loadProfile.filter((_, i) => i % 2 === 0);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Energy Optimization</h1>
 
@@ -96,6 +95,6 @@ export default function Energy() {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

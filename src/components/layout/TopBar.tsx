@@ -1,4 +1,5 @@
 import { HiBell, HiChevronDown, HiUser, HiMagnifyingGlass } from "react-icons/hi2";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -51,15 +52,16 @@ export function TopBar({
 
           <div className="flex gap-1">
             {dateFilters.map((f) => (
-              <Button
-                key={f}
-                variant={selectedDateFilter === f ? "default" : "ghost"}
-                size="sm"
-                className="h-8 text-xs px-3"
-                onClick={() => onDateFilterChange(f)}
-              >
-                {f}
-              </Button>
+              <motion.div key={f} whileTap={{ scale: 0.93 }} whileHover={{ scale: 1.04 }} transition={{ duration: 0.12 }}>
+                <Button
+                  variant={selectedDateFilter === f ? "default" : "ghost"}
+                  size="sm"
+                  className="h-8 text-xs px-3"
+                  onClick={() => onDateFilterChange(f)}
+                >
+                  {f}
+                </Button>
+              </motion.div>
             ))}
           </div>
         </div>

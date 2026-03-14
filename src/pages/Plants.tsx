@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { plants } from "@/data/mock-data";
 import { HiMapPin } from "react-icons/hi2";
@@ -10,7 +9,7 @@ export default function Plants() {
   const navigate = useNavigate();
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Solar Plants</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -38,6 +37,6 @@ export default function Plants() {
           ))}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

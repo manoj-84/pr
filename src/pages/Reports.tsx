@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HiArrowDownTray, HiDocumentText } from "react-icons/hi2";
@@ -14,7 +13,7 @@ const reports = [
 
 export default function Reports() {
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Reports</h1>
         <div className="space-y-2">
@@ -36,6 +35,6 @@ export default function Reports() {
           ))}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
