@@ -1,5 +1,41 @@
-# Logs
-logs
+# ============================================================
+#  Plant Power Hub — .gitignore
+#  Keep secrets, build artifacts, and editor noise out of git
+# ============================================================
+
+# ── Dependencies ──────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Build outputs ─────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+out/
+EXPORT_PACKAGE/
+
+# ── Lockfiles (keep one, ignore others) ───────────────────
+# Using package-lock.json as canonical lockfile
+bun.lock
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+
+# ── Environment & Secrets ─────────────────────────────────
+.env
+.env.*
+!.env.example          # allow the example template to be committed
+*.local
+
+# ── Sensitive / Private client data ───────────────────────
+CLIENT_SIGNUP_DETAILS.txt
+*.credentials.*
+*_private.*
+secrets/
+
+# ── Logs ──────────────────────────────────────────────────
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +43,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ── TypeScript ────────────────────────────────────────────
+*.tsbuildinfo
 
-# Editor directories and files
+# ── Testing ───────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Editor & OS ───────────────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+.idea/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.bak
+
+# ── Large binary / document files ─────────────────────────
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# ── Mock / Test data (large JSON files) ───────────────────
+# Uncomment to exclude heavy mock data from repo
+# src/modules/inverters/data/*.json
