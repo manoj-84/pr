@@ -1,0 +1,88 @@
+CLIENT SIGNUP DETAILS (TO BE SUBMITTED TO COMPANY)
+
+Please share the following details so we can create your account and issue login credentials.
+
+1. Client Company Information
+- Company Name:
+- Company Registration Number (if applicable):
+- Business Address:
+- Country/Region:
+- Time Zone:
+
+2. Primary Contact (Account Owner)
+- Full Name:
+- Job Title:
+- Official Email Address:
+- Phone Number:
+
+3. Technical/Operations Contact (Optional)
+- Full Name:
+- Job Title:
+- Email Address:
+- Phone Number:
+
+4. Plant Details (Input)
+- Plant Name:
+- Plant Location:
+- Installed Capacity (kW/MW):
+- AC Capacity:
+- DC Capacity:
+- Number of Inverters:
+- Inverter Brand/Model:
+- Number of Strings (if applicable):
+- Number of Feeders/Transformers:
+- Monitoring Start Date:
+- Grid Connection Voltage Level:
+- Commissioning Date:
+
+5. Plant Configuration Inputs
+- SCADA/Datalogger Vendor:
+- SCADA/Datalogger Model:
+- Communication Protocol (Modbus TCP/RTU, IEC-104, MQTT, etc.):
+- Data Polling Interval (e.g., 1 min / 5 min / 15 min):
+- Data Push Method (API/SFTP/Manual Upload):
+- Site Time Synchronization (NTP configured? Yes/No):
+- Inverter Mapping File Available? (Yes/No):
+- Meter Details (Make/Model/Serial No.):
+- Weather Station Available? (Yes/No):
+- Sensor List (Irradiance, Module Temp, Ambient Temp, Wind, etc.):
+- Alarm/Fault Code List Available? (Yes/No):
+- Single-Line Diagram (SLD) Available? (Yes/No):
+- Network Diagram Available? (Yes/No):
+- Historical Data Required for Backfill? (Yes/No):
+- Backfill Start Date (if yes):
+- API Integration Required? (Yes/No):
+- API Endpoint/Documentation Link:
+- VPN or Secure Tunnel Required? (Yes/No):
+- Site Static Public IP (if applicable):
+
+6. Access Requirements
+- Number of User Accounts Required:
+- Roles Needed (Admin/Operator/Viewer):
+- Preferred Username Format (if any):
+- IP Whitelisting Required? (Yes/No):
+- Single Sign-On (SSO) Required? (Yes/No):
+
+7. Billing/Commercial Details (if required)
+- Billing Contact Name:
+- Billing Email:
+- Purchase Order/Contract Reference:
+
+------------------------------------------------------------
+FOR COMPANY USE ONLY (CREDENTIAL HANDOVER)
+
+Account Creation Status: Pending / Completed
+Portal URL:
+Client ID:
+
+Admin Login Credentials
+- Username:
+- Temporary Password:
+
+Notes:
+- Client must change password at first login.
+- Enable 2FA after first login (recommended).
+- Credentials are shared only with authorized client contacts.
+
+Date Created:
+Created By:
