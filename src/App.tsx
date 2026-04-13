@@ -1,10 +1,14 @@
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ThemeProvider } from "@/hooks/use-theme";
+
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Performance from "./pages/Performance";
@@ -20,6 +24,11 @@ import PlantDetail from "./pages/PlantDetail";
 
 const queryClient = new QueryClient();
 
+const ProtectedRoute = ({ children }) => {
+  const isAuth = localStorage.getItem("isAuth");
+  return isAuth ? children : <Navigate to="/" />;
+};
+
 const AppLayout = () => (
   <DashboardLayout>
     <Outlet />
@@ -34,19 +43,35 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/performance" element={<Performance />} />
-              <Route path="/financial" element={<Financial />} />
-              <Route path="/energy" element={<Energy />} />
-              <Route path="/maintenance" element={<Maintenance />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/alerts" element={<Alerts />} />
-              <Route path="/plants" element={<Plants />} />
-              <Route path="/settings" element={<SettingsPage />} />
+            {/* Public routes */}
+            <Route path="/" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+
+            {/* Protected dashboard routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Index />} />
+              <Route path="performance" element={<Performance />} />
+              <Route path="financial" element={<Financial />} />
+              <Route path="energy" element={<Energy />} />
+              <Route path="maintenance" element={<Maintenance />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="admin" element={<Admin />} />
+              <Route path="alerts" element={<Alerts />} />
+              <Route path="plants" element={<Plants />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
+
+            {/* Plant detail route */}
             <Route path="/plants/:plantId/*" element={<PlantDetail />} />
+
+            {/* Fallback route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
