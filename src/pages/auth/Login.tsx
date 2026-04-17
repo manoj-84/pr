@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "sonner";
 import "./Login.css";
 
 export default function Login() {
@@ -9,32 +10,34 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      alert("Please enter username and password");
-      return;
+  if (!username || !password) {
+    alert("Please enter username and password");
+    return;
+  }
+
+  try {
+    const res = await axios.post("http://localhost:5000/login", {
+      username: username.trim(),
+      password: password.trim(),
+    });
+
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
     }
+    localStorage.setItem("isAuth", "true");
 
-    try {
-      const res = await axios.post("http://localhost:5000/login", {
-        username: username.trim(),
-        password: password.trim(),
-      });
+    // Show popup message
+    toast.success("Login successful! Redirecting to dashboard...");
 
-      // If backend sends a token, store it
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-      }
-
-      // Mark user as authenticated for ProtectedRoute
-      localStorage.setItem("isAuth", "true");
-
-      // Navigate to dashboard
+    // Delay navigation slightly so user sees the popup
+    setTimeout(() => {
       navigate("/dashboard");
-    } catch (err: any) {
-      console.error(err.response);
-      alert(err.response?.data?.error || "Login failed");
-    }
-  };
+    }, 1500);
+  } catch (err: any) {
+    console.error(err.response);
+    toast.error(err.response?.data?.error || "Login failed");
+  }
+};
 
   return (
     <div className="login-container">

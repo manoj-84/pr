@@ -1,4 +1,4 @@
-import { Plant, energyData } from "@/data/mock-data";
+import { Plant, energyData, inverters, stringData, alerts } from "@/data/mock-data";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { InverterGrid } from "@/components/dashboard/InverterGrid";
@@ -13,6 +13,29 @@ interface PlantOverviewProps {
 }
 
 export default function PlantOverview({ plant }: PlantOverviewProps) {
+  // Filter only this plant’s inverters and strings
+  const plantInverters = inverters.filter(inv => inv.plantId === plant.id);
+  const plantStrings = stringData.filter(s => s.plantId === plant.id);
+
+  // Auto-generate alerts from inverter warnings
+const inverterAlerts = plantInverters
+  .filter(inv => inv.statusDetail) // only those with warnings
+  .map(inv => ({
+    id: `auto-${inv.id}`,
+    plantId: plant.id,
+    severity: inv.status === "offline" ? "high" : "medium",
+    message: `${inv.name}: ${inv.statusDetail}`,
+    detectedAt: new Date().toLocaleTimeString(),
+    slaMinutes: 60,
+    slaRemaining: 45,
+  }));
+
+  // Merge with existing alerts
+  const plantAlerts = [
+    ...alerts.filter(alert => alert.plantId === plant.id),
+    ...inverterAlerts,
+  ];
+  
   // Mock detailed plant metrics
   const powerFactorData = energyData.pfTrend.slice(0, 24);
   
@@ -304,9 +327,10 @@ export default function PlantOverview({ plant }: PlantOverviewProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          <InverterGrid />
+          {/* Pass filtered inverters here */}
+          <InverterGrid inverters={plantInverters} />
         </div>
-        <AlertsPanel />
+        <AlertsPanel alerts={plantAlerts} />
       </div>
     </div>
   );

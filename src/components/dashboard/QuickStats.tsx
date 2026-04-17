@@ -1,14 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { HiBattery50, HiSun, HiChartBar, HiBolt } from "react-icons/hi2";
+import { plantOpsData } from "@/data/mock-data";
 
-const stats = [
-  { label: "Active Power", value: "4.58 MW", icon: HiBolt, color: "text-primary" },
-  { label: "PR Today", value: "78.4%", icon: HiChartBar, color: "text-success" },
-  { label: "Peak Irradiance", value: "950 W/m²", icon: HiSun, color: "text-warning" },
-  { label: "Grid Export", value: "32.4 MWh", icon: HiBattery50, color: "text-primary" },
-];
+export function QuickStats({ plantId, dateFilter }: { plantId: string; dateFilter: string }) {
+  const metrics = plantOpsData[plantId]?.[dateFilter.toLowerCase()] ?? plantOpsData[plantId]?.today;
+  if (!metrics) return <p>No ops data available</p>;
 
-export function QuickStats() {
+  const stats = [
+    { label: "Active Power", value: `${metrics.activePowerMW} MW`, icon: HiBolt, color: "text-primary" },
+    { label: "PR Today", value: `${metrics.prPct}%`, icon: HiChartBar, color: "text-success" },
+    { label: "Peak Irradiance", value: `${metrics.peakIrradiance} W/m²`, icon: HiSun, color: "text-warning" },
+    { label: "Grid Export", value: `${metrics.gridExportMWh} MWh`, icon: HiBattery50, color: "text-primary" },
+  ];
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((stat) => (

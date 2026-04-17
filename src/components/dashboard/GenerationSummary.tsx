@@ -1,20 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useChartColors, useTooltipStyle } from "@/hooks/use-chart-colors";
+import { plantWeeklyGeneration } from "@/data/mock-data";
 
-const weeklyData = [
-  { day: "Mon", gen: 16200 },
-  { day: "Tue", gen: 17100 },
-  { day: "Wed", gen: 15800 },
-  { day: "Thu", gen: 17400 },
-  { day: "Fri", gen: 16900 },
-  { day: "Sat", gen: 17200 },
-  { day: "Sun", gen: 14500 },
-];
-
-export function GenerationSummary() {
+export function GenerationSummary({ plantId }: { plantId: string }) {
   const cc = useChartColors();
   const tooltipProps = useTooltipStyle();
+
+  const weeklyData = plantWeeklyGeneration[plantId] ?? [];
   const totalWeek = weeklyData.reduce((s, d) => s + d.gen, 0);
 
   return (

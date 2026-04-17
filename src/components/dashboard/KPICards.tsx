@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { kpiData, formatINR, formatNumber } from "@/data/mock-data";
+import { plantKpiData, formatINR, formatNumber } from "@/data/mock-data";
 import { HiHeart, HiCurrencyDollar, HiBolt, HiClock, HiArrowTrendingDown, HiArrowTrendingUp } from "react-icons/hi2";
 
 const containerVariants = {
@@ -19,36 +19,40 @@ const getHealthColor = (score: number) => {
   return "text-destructive";
 };
 
-export function KPICards() {
+export function KPICards({ plantId, dateFilter }: { plantId: string; dateFilter: string }) {
+  const metrics = plantKpiData[plantId]?.[dateFilter.toLowerCase()] ?? plantKpiData[plantId]?.today;
+
+  if (!metrics) return <p>No KPI data available</p>;
+
   const cards = [
     {
       label: "Plant Health Score",
-      value: kpiData.healthScore,
+      value: metrics.healthScore,
       suffix: "/ 100",
       icon: HiHeart,
-      color: getHealthColor(kpiData.healthScore),
+      color: getHealthColor(metrics.healthScore),
       trend: null,
     },
     {
-      label: "Revenue Impact (MTD)",
-      value: formatINR(kpiData.revenueLostMTD),
-      subtitle: `Recovered: ${formatINR(kpiData.revenueRecoveredMTD)}`,
+      label: `Revenue Impact (${dateFilter})`,
+      value: formatINR(metrics.revenueLostMTD),
+      subtitle: `Recovered: ${formatINR(metrics.revenueRecoveredMTD)}`,
       icon: HiCurrencyDollar,
       color: "text-destructive",
-      trend: kpiData.revenueDeviationPct,
+      trend: metrics.revenueDeviationPct,
     },
     {
       label: "Expected vs Actual",
-      value: `${formatNumber(kpiData.actualKWh)} kWh`,
-      subtitle: `Expected: ${formatNumber(kpiData.expectedKWh)} kWh`,
+      value: `${formatNumber(metrics.actualKWh)} kWh`,
+      subtitle: `Expected: ${formatNumber(metrics.expectedKWh)} kWh`,
       icon: HiBolt,
       color: "text-primary",
-      trend: kpiData.deviationPct,
+      trend: metrics.deviationPct,
     },
     {
       label: "Availability",
-      value: `${kpiData.availabilityPct}%`,
-      subtitle: `Downtime: ${kpiData.downtimeHours}h`,
+      value: `${metrics.availabilityPct}%`,
+      subtitle: `Downtime: ${metrics.downtimeHours}h`,
       icon: HiClock,
       color: "text-success",
       trend: null,

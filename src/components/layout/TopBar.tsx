@@ -13,6 +13,7 @@ import {
 import { plants } from "@/data/mock-data";
 import { useState } from "react";
 import { CommandPalette } from "@/components/CommandPalette";
+import { useNavigate } from "react-router-dom"; // ✅ added
 
 const dateFilters = ["Today", "7D", "30D", "Custom"];
 
@@ -30,6 +31,16 @@ export function TopBar({
   onDateFilterChange,
 }: TopBarProps) {
   const [commandOpen, setCommandOpen] = useState(false);
+  const navigate = useNavigate(); // ✅ create navigate instance
+
+  const handleNotificationClick = () => {
+    // Navigate to Settings page (Notifications tab)
+    navigate("/settings", { state: { tab: "notifications" } });
+  };
+
+  const handleProfileClick = () => {
+    navigate("/settings", { state: { tab: "profile" } });
+  };
 
   return (
     <>
@@ -52,7 +63,12 @@ export function TopBar({
 
           <div className="flex gap-1">
             {dateFilters.map((f) => (
-              <motion.div key={f} whileTap={{ scale: 0.93 }} whileHover={{ scale: 1.04 }} transition={{ duration: 0.12 }}>
+              <motion.div
+                key={f}
+                whileTap={{ scale: 0.93 }}
+                whileHover={{ scale: 1.04 }}
+                transition={{ duration: 0.12 }}
+              >
                 <Button
                   variant={selectedDateFilter === f ? "default" : "ghost"}
                   size="sm"
@@ -81,18 +97,28 @@ export function TopBar({
             </kbd>
           </Button>
 
-          <Button variant="ghost" size="icon" className="relative h-9 w-9">
+          {/* ✅ Notification button wired to Settings (Notifications tab) */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative h-9 w-9"
+            onClick={handleNotificationClick}
+          >
             <HiBell className="h-4 w-4" />
             <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center font-medium">
               3
             </span>
           </Button>
+
           <Badge variant="secondary" className="text-xs font-normal">
             Plant Manager
           </Badge>
-          <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">
+          <button
+            onClick={handleProfileClick}
+            className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center hover:bg-muted"
+          >
             <HiUser className="h-4 w-4 text-muted-foreground" />
-          </div>
+          </button>
         </div>
       </header>
 

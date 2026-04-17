@@ -4,13 +4,10 @@ import { motion, useAnimationControls } from "framer-motion";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { TopBar } from "./TopBar";
+import Index from "@/pages/Index";
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [selectedPlant, setSelectedPlant] = useState("p1");
+export function DashboardLayout() {
+  const [selectedPlant, setSelectedPlant] = useState("p1"); // default plant ID
   const [selectedDateFilter, setSelectedDateFilter] = useState("Today");
   const location = useLocation();
   const contentControls = useAnimationControls();
@@ -40,7 +37,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             animate={contentControls}
             className="flex-1 overflow-auto p-6"
           >
-            {children}
+            {/* ✅ Render your dashboard here */}
+            <Index plantId={selectedPlant} dateFilter={selectedDateFilter} />
           </motion.main>
         </div>
       </div>

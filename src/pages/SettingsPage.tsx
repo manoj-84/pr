@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,18 @@ export default function SettingsPage() {
     phone: "+91 98765 43210",
     role: "Plant Manager",
   });
+
+  // inside SettingsPage component
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState("display");
+
+  useEffect(() => {
+    if (location.state?.tab === "notifications") {
+      setActiveTab("notifications");
+    } else if (location.state?.tab === "profile") {
+      setActiveTab("profile");
+    }
+  }, [location.state]);
 
   // Notifications
   const [notifications, setNotifications] = useState({
@@ -64,12 +77,20 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <h1 className="text-xl font-semibold text-foreground">Settings</h1>
 
-        <Tabs defaultValue="display" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-secondary/50 border border-border">
-            <TabsTrigger value="profile" className="text-xs gap-1.5"><HiUser className="h-3.5 w-3.5" /> Profile</TabsTrigger>
-            <TabsTrigger value="notifications" className="text-xs gap-1.5"><HiBell className="h-3.5 w-3.5" /> Notifications</TabsTrigger>
-            <TabsTrigger value="display" className="text-xs gap-1.5"><HiComputerDesktop className="h-3.5 w-3.5" /> Display</TabsTrigger>
-            <TabsTrigger value="system" className="text-xs gap-1.5"><HiBolt className="h-3.5 w-3.5" /> System</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs gap-1.5">
+              <HiUser className="h-3.5 w-3.5" /> Profile
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs gap-1.5">
+              <HiBell className="h-3.5 w-3.5" /> Notifications
+            </TabsTrigger>
+            <TabsTrigger value="display" className="text-xs gap-1.5">
+              <HiComputerDesktop className="h-3.5 w-3.5" /> Display
+            </TabsTrigger>
+            <TabsTrigger value="system" className="text-xs gap-1.5">
+              <HiBolt className="h-3.5 w-3.5" /> System
+            </TabsTrigger>
           </TabsList>
 
           {/* Profile */}

@@ -64,12 +64,101 @@ const App = () => (
               <Route path="reports" element={<Reports />} />
               <Route path="admin" element={<Admin />} />
               <Route path="alerts" element={<Alerts />} />
-              <Route path="plants" element={<Plants />} />
+              <Route path="plants" element={<Plants />} /> {/* dashboard plants */}
               <Route path="settings" element={<SettingsPage />} />
             </Route>
 
+            {/* Top-level Plants route (optional, for /plants) */}
+            <Route
+              path="/plants"
+              element={
+                <ProtectedRoute>
+                  <Plants />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/performance"
+              element={
+                <ProtectedRoute>
+                  <Performance />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/financial"
+              element={
+                <ProtectedRoute>
+                  <Financial />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/energy"
+              element={
+                <ProtectedRoute>
+                  <Energy />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/alerts"
+              element={
+                <ProtectedRoute>
+                  <Alerts />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/maintenance"
+              element={
+                <ProtectedRoute>
+                  <Maintenance />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Plant detail route */}
-            <Route path="/plants/:plantId/*" element={<PlantDetail />} />
+            <Route
+              path="/plants/:plantId/*"
+              element={
+                <ProtectedRoute>
+                  <PlantDetail />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Fallback route */}
             <Route path="*" element={<NotFound />} />

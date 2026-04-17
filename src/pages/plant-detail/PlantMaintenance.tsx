@@ -9,14 +9,39 @@ interface PlantMaintenanceProps {
 }
 
 export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
+  // Filter visits by plantId
+  const plantVisits = maintenanceVisits.filter((v) => v.plantId === plant.id);
+
+  // Dynamic counts
+  const completedCount = plantVisits.filter((v) => v.status === "completed").length;
+  const scheduledCount = plantVisits.filter((v) => v.status === "scheduled").length;
+  const overdueCount = plantVisits.filter((v) => v.status === "overdue").length;
+  const nextVisit = plantVisits
+  .filter((v) => v.status === "scheduled")
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]?.date;
+
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
-      completed: { label: "Completed", className: "bg-success/20 text-success border-success/30" },
-      scheduled: { label: "Scheduled", className: "bg-primary/20 text-primary border-primary/30" },
-      overdue: { label: "Overdue", className: "bg-destructive/20 text-destructive border-destructive/30" },
+      completed: {
+        label: "Completed",
+        className: "bg-success/20 text-success border-success/30",
+      },
+      scheduled: {
+        label: "Scheduled",
+        className: "bg-primary/20 text-primary border-primary/30",
+      },
+      overdue: {
+        label: "Overdue",
+        className: "bg-destructive/20 text-destructive border-destructive/30",
+      },
     };
     const config = variants[status] || variants.scheduled;
-    return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
+    return (
+      <Badge variant="outline" className={config.className}>
+        {config.label}
+      </Badge>
+    );
   };
 
   const getTypeIcon = (type: string) => {
@@ -30,7 +55,9 @@ export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{plant.name} - Maintenance</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          {plant.name} - Maintenance
+        </h1>
         <p className="text-xs text-muted-foreground mt-1">
           O&M tracking • Preventive schedules • Work order history
         </p>
@@ -43,7 +70,7 @@ export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Completed MTD</p>
-                <p className="text-2xl font-bold text-foreground">12</p>
+                <p className="text-2xl font-bold text-foreground">{completedCount}</p>
               </div>
               <HiCheckCircle className="h-8 w-8 text-success" />
             </div>
@@ -55,7 +82,7 @@ export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Scheduled</p>
-                <p className="text-2xl font-bold text-foreground">3</p>
+                <p className="text-2xl font-bold text-foreground">{scheduledCount}</p>
               </div>
               <HiClock className="h-8 w-8 text-primary" />
             </div>
@@ -67,7 +94,7 @@ export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Overdue</p>
-                <p className="text-2xl font-bold text-destructive">1</p>
+                <p className="text-2xl font-bold text-destructive">{overdueCount}</p>
               </div>
               <HiExclamationTriangle className="h-8 w-8 text-destructive" />
             </div>
@@ -79,7 +106,9 @@ export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Next Visit</p>
-                <p className="text-sm font-semibold text-foreground">Mar 5, 2024</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {nextVisit || "—"}
+                </p>
               </div>
               <HiCalendar className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -93,45 +122,59 @@ export default function PlantMaintenance({ plant }: PlantMaintenanceProps) {
           <CardTitle className="text-base">Maintenance History</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {maintenanceVisits.map((visit) => (
-            <div key={visit.id} className="border border-border rounded-lg p-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3">
-                  {getTypeIcon(visit.type)}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">{visit.id}</span>
-                      {getStatusBadge(visit.status)}
+          {plantVisits
+            .sort(
+              (a, b) =>
+                new Date(b.date).getTime() - new Date(a.date).getTime()
+            )
+            .map((visit) => (
+              <div
+                key={visit.id}
+                className="border border-border rounded-lg p-4 space-y-3"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    {getTypeIcon(visit.type)}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">
+                          {visit.id}
+                        </span>
+                        {getStatusBadge(visit.status)}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {visit.type === "preventive"
+                          ? "Preventive Maintenance"
+                          : "Corrective Action"}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {visit.type === "preventive" ? "Preventive Maintenance" : "Corrective Action"}
-                    </p>
+                  </div>
+                  <div className="text-right text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <HiCalendar className="h-3 w-3" />
+                      {visit.date}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                     <HiCalendar className="h-3 w-3" />
-                    {visit.date}
-                  </div>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                     <HiUser className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-foreground">{visit.technician}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <HiUser className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-foreground">{visit.technician}</span>
+                    </div>
+                    <span className="text-muted-foreground">
+                      Checklist: {visit.checklist}%
+                    </span>
                   </div>
-                  <span className="text-muted-foreground">Checklist: {visit.checklist}%</span>
+                  <Progress value={visit.checklist} className="h-2" />
                 </div>
-                <Progress value={visit.checklist} className="h-2" />
-              </div>
 
-              <div className="bg-muted/30 rounded p-2 text-xs text-foreground">
-                <strong>Notes:</strong> {visit.notes}
+                <div className="bg-muted/30 rounded p-2 text-xs text-foreground">
+                  <strong>Notes:</strong> {visit.notes}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </CardContent>
       </Card>
     </div>

@@ -13,7 +13,11 @@ const dotStyles = {
   offline: "bg-destructive",
 };
 
-export function InverterGrid() {
+interface InverterGridProps {
+  inverters: Inverter[];
+}
+
+export function InverterGrid({ inverters }: InverterGridProps) {
   return (
     <Card className="bg-card border-border">
       <CardHeader className="pb-2">
@@ -29,10 +33,18 @@ export function InverterGrid() {
               className={`rounded-lg border p-3 ${statusStyles[inv.status]}`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className={`h-2 w-2 rounded-full ${dotStyles[inv.status]} ${inv.status === "warning" ? "animate-pulse-glow" : ""}`} />
-                <span className="text-xs font-medium text-foreground">{inv.name}</span>
+                <span
+                  className={`h-2 w-2 rounded-full ${dotStyles[inv.status]} ${
+                    inv.status === "warning" ? "animate-pulse-glow" : ""
+                  }`}
+                />
+                <span className="text-xs font-medium text-foreground">
+                  {inv.name}
+                </span>
               </div>
-              <div className="text-lg font-bold text-foreground">{inv.output} kW</div>
+              <div className="text-lg font-bold text-foreground">
+                {inv.output} kW
+              </div>
               {inv.statusDetail && (
                 <span className="text-[10px] text-warning">{inv.statusDetail}</span>
               )}

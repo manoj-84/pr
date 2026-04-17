@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: HiSquares2X2 },
+  { title: "Dashboard", url: "/dashboard", icon: HiSquares2X2 },
   { title: "Plants", url: "/plants", icon: HiHomeModern },
   { title: "Performance", url: "/performance", icon: HiChartBar },
   { title: "Financial", url: "/financial", icon: HiCurrencyDollar },

@@ -1,7 +1,15 @@
 import { Plant, faults } from "@/data/mock-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HiExclamationTriangle, HiClock, HiUser, HiCheckCircle, HiXCircle, HiArrowPath } from "react-icons/hi2";
+import { 
+  HiExclamationTriangle, 
+  HiClock, 
+  HiUser, 
+  HiCheckCircle, 
+  HiXCircle, 
+  HiArrowPath, 
+  HiQuestionMarkCircle 
+} from "react-icons/hi2";
 
 interface PlantFaultsProps {
   plant: Plant;
@@ -26,7 +34,11 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
         icon: HiExclamationTriangle
       },
     };
-    const config = variants[severity] || variants.minor;
+    const config = variants[severity] || { 
+      label: "Unknown", 
+      className: "bg-gray-200 text-gray-600", 
+      icon: HiQuestionMarkCircle 
+    };
     const Icon = config.icon;
     return (
       <Badge variant="outline" className={config.className}>
@@ -54,7 +66,11 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
         icon: HiCheckCircle
       },
     };
-    const config = variants[status] || variants.open;
+    const config = variants[status] || { 
+      label: "Unknown", 
+      className: "bg-gray-200 text-gray-600", 
+      icon: HiQuestionMarkCircle 
+    };
     const Icon = config.icon;
     return (
       <Badge variant="outline" className={config.className}>
@@ -64,8 +80,22 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
     );
   };
 
-  const openFaults = faults.filter(f => f.status !== "resolved");
-  const resolvedFaults = faults.filter(f => f.status === "resolved");
+  // Filter faults 
+  const plantFaults = faults.filter(f => f.plantId === plant.id);
+  const openFaults = plantFaults.filter(f => f.status !== "resolved");
+  const resolvedFaults = plantFaults.filter(f => f.status === "resolved");
+
+
+  // Dynamic metrics
+  const resolvedMTD = resolvedFaults.length;
+  const criticalOpen = openFaults.filter(f => f.severity === "critical").length;
+  const avgResolution = resolvedFaults.some(f => f.resolutionHours)
+  ? (
+      resolvedFaults.reduce((acc, f) => acc + (f.resolutionHours || 0), 0) /
+      resolvedFaults.filter(f => f.resolutionHours).length
+    ).toFixed(1) + "h"
+  : "—";
+
 
   return (
     <div className="space-y-6">
@@ -95,9 +125,7 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Critical</p>
-                <p className="text-2xl font-bold text-destructive">
-                  {faults.filter(f => f.severity === "critical" && f.status !== "resolved").length}
-                </p>
+                <p className="text-2xl font-bold text-destructive">{criticalOpen}</p>
               </div>
               <HiExclamationTriangle className="h-8 w-8 text-destructive" />
             </div>
@@ -109,7 +137,7 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Resolved MTD</p>
-                <p className="text-2xl font-bold text-success">18</p>
+                <p className="text-2xl font-bold text-success">{resolvedMTD}</p>
               </div>
               <HiCheckCircle className="h-8 w-8 text-success" />
             </div>
@@ -121,7 +149,7 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Avg. Resolution</p>
-                <p className="text-xl font-bold text-foreground">2.4h</p>
+                <p className="text-xl font-bold text-foreground">{avgResolution}</p>
               </div>
               <HiClock className="h-8 w-8 text-primary" />
             </div>
@@ -146,7 +174,7 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
                   </div>
                   <p className="text-sm text-foreground">{fault.description}</p>
                 </div>
-                {fault.slaCountdown !== "—" && (
+                {fault.slaCountdown && fault.slaCountdown !== "—" && (
                   <div className="text-right">
                     <div className="text-xs text-muted-foreground mb-1">SLA Remaining</div>
                     <div className="text-lg font-bold text-destructive flex items-center gap-1">
@@ -165,7 +193,7 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <HiUser className="h-3 w-3" />
-                    Assigned: {fault.assignee}
+                    Assignee: {fault.assignee}
                   </div>
                 </div>
               </div>
@@ -181,7 +209,10 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {resolvedFaults.map((fault) => (
-            <div key={fault.id} className="border border-border rounded-lg p-4 space-y-3 opacity-60">
+            <div
+              key={fault.id}
+              className="border border-border rounded-lg p-4 space-y-3 opacity-60"
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -201,7 +232,7 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <HiUser className="h-3 w-3" />
-                    Resolved by: {fault.assignee}
+                    Assignee: {fault.assignee}
                   </div>
                 </div>
               </div>
@@ -212,3 +243,4 @@ export default function PlantFaults({ plant }: PlantFaultsProps) {
     </div>
   );
 }
+
