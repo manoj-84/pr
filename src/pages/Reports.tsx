@@ -1,16 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HiArrowDownTray, HiDocumentText } from "react-icons/hi2";
-import { 
-  generateMonthlyPerformancePDF, 
-  generateSLACompliancePDF, 
-  generateFinancialSummaryPDF 
-} from "@/lib/pdfReports";
 
 const reports = [
-  { name: "Monthly Performance Report", type: "PDF", date: "Feb 2024", action: generateMonthlyPerformancePDF },
-  { name: "SLA Compliance Report", type: "PDF", date: "Feb 2024", action: generateSLACompliancePDF },
-  { name: "Financial Summary", type: "Excel", date: "Feb 2024", action: generateFinancialSummaryPDF },
+  { name: "Monthly Performance Report", type: "PDF", date: "Feb 2024", file: "/files/monthly-performance-feb2024.pdf" },
+  { name: "SLA Compliance Report", type: "PDF", date: "Feb 2024", file: "/files/sla-compliance-feb2024.pdf" },
+  { name: "Financial Summary", type: "Excel", date: "Feb 2024", file: "/files/financial-summary-feb2024.xlsx" },
   { name: "Annual PR Trend Analysis", type: "PDF", date: "FY 2023-24", file: "/files/annual-pr-trend-fy2023-24.pdf" },
   { name: "Inverter Health Report", type: "PDF", date: "Feb 2024", file: "/files/inverter-health-feb2024.pdf" },
   { name: "Grid Availability Summary", type: "Excel", date: "Feb 2024", file: "/files/grid-availability-feb2024.xlsx" },
