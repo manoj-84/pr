@@ -77,7 +77,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/performance"
               element={
